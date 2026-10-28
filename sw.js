@@ -1,7 +1,7 @@
 // 오프라인 지원. 앱 파일은 버전별로 미리 캐시(cache-first), 단어 md는 network-first,
 // 폰트는 처음 받을 때 캐시한다. 새 버전은 다음 실행 때 적용된다(열려 있는 페이지는 새로고침하지 않음).
 // 배포할 때마다 VERSION을 올린다. 파일을 추가하면 APP_FILES에도 넣는다(tests/pwa.test.js가 확인).
-const VERSION = 'v1';
+const VERSION = 'v2';
 const APP_CACHE = `toeic-app-${VERSION}`;
 const FONT_CACHE = 'toeic-fonts-v1';
 const FONT_HOSTS = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
@@ -55,15 +55,22 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-async function networkFirst(request) {
+// 단어 md: 네트워크를 먼저 쓰되(수정이 바로 반영되게), 신호가 약해 MD_TIMEOUT_MS 안에 오지 않으면
+// 캐시 사본으로 먼저 열고 늦게 온 응답은 캐시만 갱신한다.
+const MD_TIMEOUT_MS = 3000;
+async function networkFirst(event) {
+  const { request } = event;
   const cache = await caches.open(APP_CACHE);
-  try {
-    const response = await fetch(request);
-    if (response.ok) await cache.put(request, response.clone());
+  const network = fetch(request).then(async (response) => {
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    await cache.put(request, response.clone());
     return response;
-  } catch {
-    return (await cache.match(request, { ignoreSearch: true })) ?? Response.error();
-  }
+  });
+  event.waitUntil(network.catch(() => {}));
+  const cached = await cache.match(request, { ignoreSearch: true });
+  if (!cached) return network.catch(() => Response.error());
+  const timeout = new Promise((resolve) => setTimeout(() => resolve(cached), MD_TIMEOUT_MS));
+  return Promise.race([network.catch(() => cached), timeout]);
 }
 
 async function cacheFirst(request, cacheName) {
@@ -95,6 +102,6 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') event.respondWith(navigation(request));
-  else if (url.pathname.endsWith('.md')) event.respondWith(networkFirst(request));
+  else if (url.pathname.endsWith('.md')) event.respondWith(networkFirst(event));
   else event.respondWith(cacheFirst(request, APP_CACHE));
 });

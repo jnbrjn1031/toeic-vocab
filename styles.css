@@ -720,6 +720,8 @@ body.no-tabs .dock { bottom: 0; padding-bottom: calc(var(--safe-b) + 16px); }
   animation: toast-in .25s var(--ease) both;
 }
 
+.loading { padding-top: 38vh; text-align: center; color: var(--text-2); }
+
 /* ───────── 에러 화면 ───────── */
 .error-screen { padding-top: 64px; }
 .error-screen h1 { font-size: var(--fs-28); line-height: var(--lh-28); font-weight: 750; letter-spacing: -0.02em; margin-bottom: 12px; }
