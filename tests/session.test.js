@@ -100,6 +100,28 @@ test('reconcileSession: 남은 문제를 다 풀었으면 라운드 마무리', 
   assert.deepEqual(r.firstScore, { correct: 9, total: 9 });
 });
 
+test('reconcileSession: 복습할 단어가 전부 사라지면 막히지 않고 완료', () => {
+  let s = beginQuiz(startDaySession(1, vocab, D), vocab, makeRng(11));
+  let n = 0;
+  s = leaveResult(play(s, (x) => (n++ === 0 ? wrong(x) : right(x)))); // 1개 틀림 → reviewStudy
+  const gone = new Map(vocab.byKey); gone.delete(s.cardKeys[0]);
+  assert.equal(reconcileSession(s, gone).stage, 'done');
+  assert.equal(reconcileSession(beginQuiz(s, vocab, makeRng(12)), gone).stage, 'done'); // reviewQuiz
+});
+
+test('reconcileSession: 연습 문제가 전부 사라지면 완료', () => {
+  const p = startPracticeSession(['submit'], vocab, makeRng(13), D);
+  const gone = new Map(vocab.byKey); gone.delete('submit');
+  assert.equal(reconcileSession(p, gone).stage, 'done');
+});
+
+test('reconcileSession: 본 퀴즈 문제가 전부 사라지면 결과로', () => {
+  const s = beginQuiz(startDaySession(1, vocab, D), vocab, makeRng(14));
+  const r = reconcileSession(s, new Map());
+  assert.equal(r.stage, 'result');
+  assert.deepEqual(r.firstScore, { correct: 0, total: 0 });
+});
+
 test('오답 연습: 최대 30개, 퀴즈 → result → done', () => {
   const keys = parsed.words.slice(0, 40).map((w) => w.key);
   let p = startPracticeSession(keys, vocab, makeRng(9), '2026-10-30');

@@ -112,7 +112,12 @@ export function reconcileSession(s, byKey) {
     answers: s.answers.filter((_, i) => keep[i]),
     qIndex: keep.slice(0, s.qIndex).filter(Boolean).length,
   };
+  // 라운드에 남은 카드·문제가 하나도 없으면 막히지 않게 바로 마무리한다.
+  const isStudy = next.stage === 'study' || next.stage === 'reviewStudy';
+  if ((isStudy && next.cardKeys.length === 0) || (isQuiz(next) && next.questions.length === 0)) {
+    return next.kind === 'practice' || next.round > 0 ? { ...next, stage: 'done' } : endRound(next);
+  }
   // 남은 문제를 이미 다 풀었으면 라운드를 마무리한다.
-  if (isQuiz(next) && next.questions.length > 0 && next.qIndex >= next.questions.length) return endRound(next);
+  if (isQuiz(next) && next.qIndex >= next.questions.length) return endRound(next);
   return next;
 }
