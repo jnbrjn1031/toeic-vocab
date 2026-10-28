@@ -59,6 +59,14 @@ export function wordCard(word, { badge = null } = {}) {
   return card;
 }
 
+// 결과·오답노트·단어장에서 쓰는 한 줄짜리 단어 행. 탭하면 onClick.
+export function wordRow(word, { onClick, aside } = {}) {
+  return h('li', null, h('button', { class: 'word-row', type: 'button', onClick },
+    h('span', { class: 'word-row__head', lang: 'en' }, word.word),
+    h('span', { class: 'word-row__meaning' }, word.meaning),
+    aside != null ? h('span', { class: 'word-row__aside' }, aside) : null));
+}
+
 export function ring(value, max, label, { size = 132, stroke = 10 } = {}) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
