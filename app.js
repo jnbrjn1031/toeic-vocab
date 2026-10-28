@@ -2,7 +2,7 @@
 import { parseVocab, VocabError } from './js/core/parser.js';
 import { reconcileSession, addActiveTime } from './js/core/session.js';
 import { toDateStr } from './js/core/dates.js';
-import { loadData, saveData, requestPersist } from './js/store.js';
+import { STORAGE_KEY, loadData, saveData, requestPersist } from './js/store.js';
 import { applyTheme } from './js/ui/theme.js';
 import { sheet, toast, wordCard } from './js/ui/widgets.js';
 import * as home from './js/ui/screens/home.js';
@@ -30,20 +30,52 @@ const NO_TABS = new Set(['#/session', '#/practice', '#/settings']);
 let vocab = null;
 let data = null;
 let lastRoute = null;
+let renderedDay = null;
+let savedRaw = null; // 이 창이 마지막으로 읽거나 쓴 저장값. 다르면 다른 창(탭·홈 화면 앱)이 바꾼 것.
+
+function readRaw() {
+  try {
+    return localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return savedRaw;
+  }
+}
+
+function loadFromStorage() {
+  const d = loadData();
+  data = { ...d, session: reconcileSession(d.session, vocab.byKey), practice: reconcileSession(d.practice, vocab.byKey) };
+  savedRaw = readRaw();
+}
+
+// 다른 창이 저장한 새 기록이 있으면 불러온다. 옛 데이터로 덮어써 기록을 잃지 않기 위해서다.
+function syncFromStorage() {
+  if (readRaw() === savedRaw) return false;
+  loadFromStorage();
+  applyTheme(data.settings.theme);
+  return true;
+}
 
 const ctx = {
   get vocab() { return vocab; },
   get data() { return data; },
   today: () => toDateStr(new Date()),
   update(fn, { render = true } = {}) {
+    if (syncFromStorage()) {
+      renderRoute();
+      toast('다른 화면에서 바뀐 기록을 불러왔어요');
+      return;
+    }
     const next = fn(data);
     if (next === data) return;
     data = next;
-    if (!saveData(data)) toast('저장 공간이 부족해서 저장하지 못했어요');
+    if (saveData(data)) savedRaw = JSON.stringify(data);
+    else toast('저장 공간이 부족해서 저장하지 못했어요');
     if (render) renderRoute();
   },
-  go(route) {
+  // replace: 방문 기록을 쌓지 않는 이동(리다이렉트). 뒤로 가기가 같은 화면을 맴돌지 않게 한다.
+  go(route, { replace = false } = {}) {
     if (location.hash === route) renderRoute();
+    else if (replace) location.replace(route);
     else location.hash = route;
   },
   openWord(key) {
@@ -61,6 +93,7 @@ function renderRoute() {
   const route = currentRoute();
   const keepScroll = route === lastRoute ? window.scrollY : 0;
   lastRoute = route;
+  renderedDay = ctx.today();
   document.body.classList.toggle('no-tabs', NO_TABS.has(route));
   tabbar.hidden = NO_TABS.has(route);
   for (const a of tabbar.querySelectorAll('a')) {
@@ -118,12 +151,7 @@ async function boot() {
   vocab = await loadVocab();
   if (!vocab) return;
 
-  data = loadData();
-  data = {
-    ...data,
-    session: reconcileSession(data.session, vocab.byKey),
-    practice: reconcileSession(data.practice, vocab.byKey),
-  };
+  loadFromStorage();
   applyTheme(data.settings.theme);
   requestPersist();
 
@@ -131,9 +159,17 @@ async function boot() {
     tick = performance.now();
     renderRoute();
   });
+  // 다시 보일 때: 다른 창이 기록을 바꿨거나 자정이 지났으면 화면을 새로 그린다(잠금·D-day·스트릭 갱신).
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') flushActiveTime();
-    else tick = performance.now();
+    if (document.visibilityState === 'hidden') {
+      flushActiveTime();
+      return;
+    }
+    tick = performance.now();
+    if (syncFromStorage() || ctx.today() !== renderedDay) renderRoute();
+  });
+  window.addEventListener('storage', (e) => {
+    if ((e.key === STORAGE_KEY || e.key === null) && syncFromStorage()) renderRoute();
   });
   document.addEventListener('pointerdown', flushActiveTime, true);
 

@@ -22,7 +22,7 @@ const onSlot = (slot, fn) => (d) => {
 export function render(ctx, slot) {
   const s = ctx.data[slot];
   if (!s) {
-    queueMicrotask(() => ctx.go('#/home'));
+    queueMicrotask(() => ctx.go('#/home', { replace: true }));
     return h('section');
   }
   switch (s.stage) {
@@ -271,14 +271,14 @@ function confetti(host) {
 function doneView(ctx, slot) {
   if (slot === 'practice') {
     ctx.update((d) => ({ ...d, practice: null }), { render: false });
-    queueMicrotask(() => ctx.go('#/home'));
+    queueMicrotask(() => ctx.go('#/home', { replace: true }));
     return h('section');
   }
   try {
     ctx.update((d) => finishDay(d, ctx.today()), { render: false });
   } catch (e) {
     ctx.toast(e.message);
-    queueMicrotask(() => ctx.go('#/home'));
+    queueMicrotask(() => ctx.go('#/home', { replace: true }));
     return h('section');
   }
 
@@ -297,7 +297,7 @@ function doneView(ctx, slot) {
       stat('연속 학습', `${days}일`)),
     h('div', { class: 'dock-spacer' }),
     h('div', { class: 'dock' },
-      h('button', { class: 'btn btn--primary btn--lg', type: 'button', onClick: () => ctx.go('#/home') }, '홈으로')));
+      h('button', { class: 'btn btn--primary btn--lg', type: 'button', onClick: () => ctx.go('#/home', { replace: true }) }, '홈으로')));
   if (!reducedMotion()) confetti(view);
   return view;
 }
