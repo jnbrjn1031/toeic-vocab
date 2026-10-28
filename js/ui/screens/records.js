@@ -11,6 +11,16 @@ let viewMonth = null; // 'YYYY-MM'
 
 const pctOf = (r) => (r.firstScore?.total ? Math.round((r.firstScore.correct / r.firstScore.total) * 100) : 0);
 
+// 달력 진하기 4단계(강조색 섞는 비율). 중간 진하기는 흰 글씨·검은 글씨 모두 대비가 부족해서
+// 앞 세 단계는 본문색, 마지막 단계만 강조색 위 글씨색을 쓴다(라이트·다크 모두 4.5:1 이상).
+const SHADES = [
+  { min: 90, mix: 90, strong: true },
+  { min: 70, mix: 50, strong: false },
+  { min: 50, mix: 36, strong: false },
+  { min: 0, mix: 20, strong: false },
+];
+const shadeOf = (pct) => SHADES.find((s) => pct >= s.min);
+
 function minutes(ms) {
   const m = Math.round(ms / 60000);
   return m < 1 ? '1분 미만' : `${m}분`;
@@ -61,11 +71,11 @@ function calendar(ctx, byDate) {
       continue;
     }
     const pct = Math.round(recs.reduce((n, r) => n + pctOf(r), 0) / recs.length);
-    const mix = Math.round(22 + pct * 0.78);
+    const shade = shadeOf(pct);
     cells.push(h('button', {
-      class: `cal__cell is-done${mix > 58 ? ' is-strong' : ''}${isToday ? ' is-today' : ''}`,
+      class: `cal__cell is-done${shade.strong ? ' is-strong' : ''}${isToday ? ' is-today' : ''}`,
       type: 'button',
-      style: { '--mix': `${mix}%` },
+      style: { '--mix': `${shade.mix}%` },
       'aria-label': `${m}월 ${d}일, ${recs.map((r) => `${r.day}일차`).join(', ')}, 첫 퀴즈 정답률 ${pct}%`,
       onClick: () => detailSheet(ctx, date, recs),
     }, String(d)));
@@ -86,7 +96,7 @@ function calendar(ctx, byDate) {
       cells),
     h('div', { class: 'cal__legend', 'aria-hidden': 'true' },
       h('span', null, '정답률 낮음'),
-      [25, 50, 75, 100].map((p) => h('i', { style: { '--mix': `${Math.round(22 + p * 0.78)}%` } })),
+      [...SHADES].reverse().map((s) => h('i', { style: { '--mix': `${s.mix}%` } })),
       h('span', null, '높음')));
 }
 

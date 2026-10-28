@@ -6,14 +6,14 @@
   --surface-2: #ECEBE4;
   --text: #1C211E;
   --text-2: #5C635E;
-  --text-3: #858B86;
+  --text-3: #6B716C;
   --border: #E1DFD7;
   --accent: #1E5B45;
   --accent-ink: #FFFFFF;
   --accent-soft: #E0EAE4;
   --correct: #2459C9;
   --correct-soft: #E3EBFA;
-  --wrong: #C2392F;
+  --wrong: #B3332A;
   --wrong-soft: #FAE6E3;
   --shadow: 0 1px 2px rgba(28, 33, 30, .05), 0 10px 28px -6px rgba(28, 33, 30, .10);
   --shadow-lift: 0 2px 4px rgba(28, 33, 30, .06), 0 22px 44px -12px rgba(28, 33, 30, .22);
@@ -46,7 +46,7 @@
     --surface-2: #2C302E;
     --text: #ECEEEA;
     --text-2: #A6ACA7;
-    --text-3: #7D837E;
+    --text-3: #8A908B;
     --border: #353937;
     --accent: #6DBE98;
     --accent-ink: #0F1B15;
@@ -66,7 +66,7 @@
   --surface-2: #2C302E;
   --text: #ECEEEA;
   --text-2: #A6ACA7;
-  --text-3: #7D837E;
+  --text-3: #8A908B;
   --border: #353937;
   --accent: #6DBE98;
   --accent-ink: #0F1B15;
@@ -170,7 +170,7 @@ body.no-tabs #view { padding-bottom: calc(var(--safe-b) + 32px); }
   padding-top: 8px;
 }
 .topbar h1 { flex: 1; font-size: var(--fs-20); line-height: var(--lh-20); font-weight: 700; letter-spacing: -0.01em; }
-.screen-title { font-size: var(--fs-28); line-height: var(--lh-28); font-weight: 750; letter-spacing: -0.02em; margin: 8px 0 20px; }
+.screen-title { font-size: var(--fs-28); line-height: var(--lh-28); font-weight: 750; letter-spacing: -0.02em; margin: 24px 0 20px; }
 
 .icon-btn {
   display: inline-grid;
@@ -258,7 +258,7 @@ body.no-tabs .dock { bottom: 0; padding-bottom: calc(var(--safe-b) + 16px); }
 .flashcard {
   position: relative;
   perspective: 1400px;
-  min-height: 360px;
+  min-height: clamp(360px, 54dvh, 480px);
   outline: none;
   user-select: none;
   -webkit-user-select: none;
@@ -624,7 +624,7 @@ body.no-tabs .dock { bottom: 0; padding-bottom: calc(var(--safe-b) + 16px); }
 .chart__svg { display: block; width: 100%; height: auto; overflow: visible; }
 .chart__grid { stroke: var(--border); stroke-width: 1; }
 .chart__tick { fill: var(--text-3); font-family: var(--font-en); font-size: 11px; }
-.chart__bar { fill: color-mix(in srgb, var(--accent) 55%, var(--surface)); }
+.chart__bar { fill: color-mix(in srgb, var(--accent) 70%, var(--surface)); }
 .chart__bar.is-active { fill: var(--accent); }
 .chart__hit { fill: transparent; cursor: pointer; }
 
