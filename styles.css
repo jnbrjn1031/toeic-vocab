@@ -583,6 +583,99 @@ body.no-tabs .dock { bottom: 0; padding-bottom: calc(var(--safe-b) + 16px); }
 }
 .switch[aria-checked="true"] .switch__knob { transform: translateX(20px); }
 
+/* ───────── 기록 ───────── */
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.summary { display: grid; grid-template-columns: repeat(3, 1fr); margin: 0 0 20px; }
+.summary div + div { padding-left: 14px; border-left: 1px solid var(--border); }
+.summary dt { font-size: var(--fs-12); line-height: var(--lh-12); color: var(--text-2); }
+.summary dd { margin: 4px 0 0; font-size: var(--fs-16); line-height: var(--lh-16); font-weight: 600; }
+.summary dd .num { font-size: var(--fs-20); }
+
+.cal { padding: 8px 14px 14px; }
+.cal__head { display: flex; align-items: center; justify-content: space-between; padding: 0 8px; }
+.cal__month { font-weight: 700; }
+.cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-top: 4px; }
+.cal__dow { padding: 6px 0; text-align: center; font-size: var(--fs-12); line-height: var(--lh-12); color: var(--text-3); }
+.cal__cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  min-height: 40px;
+  border: 0;
+  border-radius: 12px;
+  background: none;
+  color: var(--text-2);
+  font-family: var(--font-en);
+  font-size: var(--fs-14);
+  font-variant-numeric: tabular-nums;
+}
+.cal__cell.is-done { background: color-mix(in srgb, var(--accent) var(--mix), var(--surface)); color: var(--text); font-weight: 600; }
+.cal__cell.is-strong { color: var(--accent-ink); }
+.cal__cell.is-today { box-shadow: inset 0 0 0 2px var(--text); }
+.cal__legend { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 12px; font-size: var(--fs-12); line-height: var(--lh-12); color: var(--text-2); }
+.cal__legend i { width: 14px; height: 14px; border-radius: 4px; background: color-mix(in srgb, var(--accent) var(--mix), var(--surface)); }
+.cal__legend span:first-child { margin-right: 4px; }
+.cal__legend span:last-child { margin-left: 4px; }
+
+.records__chart-title { margin-top: 28px; }
+.chart__readout { display: flex; align-items: baseline; gap: 8px; min-height: 28px; font-size: var(--fs-14); line-height: var(--lh-14); }
+.chart__readout strong { font-size: var(--fs-20); line-height: var(--lh-20); }
+.chart__svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart__grid { stroke: var(--border); stroke-width: 1; }
+.chart__tick { fill: var(--text-3); font-family: var(--font-en); font-size: 11px; }
+.chart__bar { fill: color-mix(in srgb, var(--accent) 55%, var(--surface)); }
+.chart__bar.is-active { fill: var(--accent); }
+.chart__hit { fill: transparent; cursor: pointer; }
+
+.day-detail__item + .day-detail__item { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+.day-detail__day { margin-bottom: 8px; font-size: var(--fs-16); font-weight: 700; }
+.day-detail__sub { margin: 14px 0 6px; font-size: var(--fs-14); line-height: var(--lh-14); font-weight: 600; color: var(--text-2); }
+.facts { display: grid; gap: 6px; margin: 0; }
+.facts div { display: flex; justify-content: space-between; gap: 12px; }
+.facts dt { color: var(--text-2); }
+.facts dd { margin: 0; font-weight: 600; }
+
+/* ───────── 오답노트 ───────── */
+.wrong__intro { display: grid; gap: 12px; margin-bottom: 20px; }
+.wrong__hint { font-size: var(--fs-12); line-height: var(--lh-12); color: var(--text-3); }
+
+/* ───────── 단어장 ───────── */
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  margin-bottom: 16px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-3);
+}
+.search input { flex: 1; min-width: 0; height: 46px; border: 0; outline: none; background: none; color: var(--text); font-size: var(--fs-16); }
+.search:focus-within { border-color: var(--accent); }
+.set { border-top: 1px solid var(--border); }
+.set:last-child { border-bottom: 1px solid var(--border); }
+.set__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 2px;
+  border: 0;
+  background: none;
+  text-align: left;
+}
+.set__name { font-weight: 600; letter-spacing: -0.01em; }
+.set__meta { flex: 1; font-size: var(--fs-14); line-height: var(--lh-14); color: var(--text-2); }
+.set__head .icon { color: var(--text-3); transition: transform .2s var(--ease); }
+.set__head[aria-expanded="true"] .icon { transform: rotate(180deg); }
+.set .word-rows { border-top: 0; padding-left: 6px; }
+.set .word-rows li:last-child .word-row { border-bottom: 0; }
+.set.is-locked .set__name, .set.is-locked .word-rows { opacity: .45; }
+
 /* ───────── 시트·토스트 ───────── */
 .sheet-backdrop {
   position: fixed;
